@@ -57,7 +57,7 @@ func NewInputParser() InputParser {
 	return InputParser{
 		user:    sanitizeInput(user),
 		verb:    sanitizeInput(verb),
-		tasks:   sanitizeInput(tasks),
+		tasks:   strings.TrimSpace(*tasks),
 		workers: *workers,
 	}
 }
