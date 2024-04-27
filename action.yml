@@ -1,0 +1,25 @@
+name: Terraform_async
+description: run terraform concurrently
+inputs:
+  tasks:
+    description: "terraform project folders"
+    required: true
+  verb:
+    description: "plan, apply or destroy"
+    required: true
+  workers:
+    description: "insert the number of workers to run concurrently"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        cp $GITHUB_ACTION_PATH/bin/* $GITHUB_WORKSPACE
+        chmod +x tfbin
+        ./tfbin \
+        --tasks="${{ inputs.tasks }}" \
+        --user=$GITHUB_ACTOR \
+        --workers=${{ inputs.workers }} \
+        --verb=${{ inputs.verb }}
+      shell: bash
