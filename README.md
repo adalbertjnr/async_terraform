@@ -15,9 +15,8 @@ Then the action will run all projects concurrently based on the number os worker
 ```
 The Action must have three parameters
 1. workers -> Specifies the number of workers running concurrently in a worker pool to execute the terraform tasks. The default value is 2.
-2. action_name -> Specifies the name of the .yaml/.yml file located under `.github/workflows/`
-3. verb -> Specifies the action to be performed by Terraform. Plan, apply or destroy. This is set manually by input using workflow_dispatch as the example below
-4. tasks -> The list of tasks (terraform projects) to be read by the action
+2. verb -> Specifies the action to be performed by Terraform. Plan, apply or destroy. This is set manually by input using workflow_dispatch as the example below
+3. tasks -> The list of tasks (terraform projects) to be read by the action
 ```
 
 **Below is the folder structure example to use the action**
@@ -78,7 +77,6 @@ jobs:
         uses: adalbertjnr/async_terraform@v1
         with:
           workers: 2
-          action_name: action.yml
           verb: ${{ inputs.verb }}
           tasks: |
             terraform_1,
