@@ -17,10 +17,10 @@ type TFService struct {
 	execPath string
 }
 
-type installerFunc func() (string, error)
+type installerFunc func(v string) (string, error)
 
-func NewTerraformService(installer installerFunc) (*TFService, error) {
-	execPath, err := installer()
+func NewTerraformService(installer installerFunc, version string) (*TFService, error) {
+	execPath, err := installer(version)
 	if err != nil {
 		return nil, err
 	}
@@ -29,10 +29,10 @@ func NewTerraformService(installer installerFunc) (*TFService, error) {
 	}, nil
 }
 
-func terraformInstaller() (string, error) {
+func terraformInstaller(v string) (string, error) {
 	installer := releases.ExactVersion{
 		Product: product.Terraform,
-		Version: version.Must(version.NewVersion("1.7.0")),
+		Version: version.Must(version.NewVersion(v)),
 	}
 	return installer.Install(context.Background())
 }

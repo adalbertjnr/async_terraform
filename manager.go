@@ -24,6 +24,7 @@ type workManagerParams struct {
 	user    string
 	verb    string
 	tasks   string
+	version string
 	workers int
 }
 

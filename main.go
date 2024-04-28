@@ -11,7 +11,7 @@ func main() {
 		return
 	}
 
-	svc, err := NewTerraformService(terraformInstaller)
+	svc, err := NewTerraformService(terraformInstaller, params.version)
 	if err != nil {
 		log.Fatal(err)
 	}
