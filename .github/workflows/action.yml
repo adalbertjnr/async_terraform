@@ -1,7 +1,7 @@
 on:
   push:
-    branchs:
-      - */*
+    branchs-ignore:
+      - main
 
 jobs:
   create_image:
