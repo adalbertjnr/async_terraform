@@ -13,10 +13,11 @@ Then the action will run all projects concurrently based on the number os worker
 ### Usage
 
 ```
-The Action must have three parameters
+The Action must have four parameters
 1. workers -> Specifies the number of workers running concurrently in a worker pool to execute the terraform tasks. The default value is 2.
 2. verb -> Specifies the action to be performed by Terraform. Plan, apply or destroy. This is set manually by input using workflow_dispatch as the example below
 3. tasks -> The list of tasks (terraform projects) to be read by the action
+4. version -> Specifies the terraform version
 ```
 
 **Below is the folder structure example to use the action**
@@ -43,7 +44,7 @@ Remember to replace each string in "tasks" with each name of your project. In th
 
 ### The action need to be like this
 
-**The credentials step below can be modified to autenticate in another cloud providers**
+**The credentials step below can be modified to autenticate in another cloud provider**
 
 ```yaml
 on:
@@ -78,6 +79,7 @@ jobs:
         with:
           workers: 2
           verb: ${{ inputs.verb }}
+          version: "1.7.0"
           tasks: |
             terraform_1,
             terraform_2,

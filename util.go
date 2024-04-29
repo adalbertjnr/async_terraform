@@ -18,6 +18,7 @@ type InputParser struct {
 	user    string
 	verb    string
 	tasks   string
+	version string
 	workers int
 }
 
@@ -53,11 +54,13 @@ func NewInputParser() InputParser {
 	verb := flag.String("verb", "plan", "set the verb - plan - apply - destroy")
 	workers := flag.Int("workers", 2, "set the number of workers to run concurrently")
 	tasks := flag.String("tasks", "", "tasks that will be executed by terraform")
+	version := flag.String("version", "1.7.0", "terraform version")
 	flag.Parse()
 	return InputParser{
 		user:    sanitizeInput(user),
 		verb:    sanitizeInput(verb),
 		tasks:   strings.TrimSpace(*tasks),
+		version: strings.TrimSpace(*version),
 		workers: *workers,
 	}
 }
