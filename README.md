@@ -75,7 +75,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Terraform Task
-        uses: adalbertjnr/async_terraform@v2
+        uses: adalbertjnr/async_terraform@v1
         with:
           workers: 2
           verb: ${{ inputs.verb }}
