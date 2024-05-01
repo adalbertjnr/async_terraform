@@ -23,7 +23,7 @@ The Action must have four parameters
 **Below is the folder structure example to use the action**
 Remember to replace each string in "tasks" with each name of your project. In the example below I'm using terraform_1, terraform_2, terraform_3, terraform_4
 
-### The action need to be like this
+### Examples
 
 **The credentials step below can be modified to autenticate in another cloud provider**
 
@@ -38,7 +38,7 @@ If the user need to run only a single project, there's no need to set workers (d
 └── provider.tf
 ```
 
-Below is the action example
+Action example:
 
 ```yaml
 on:
@@ -94,6 +94,8 @@ Example for few terraform projects.
 │   └── vpc.tf
 
 ```
+
+Action example:
 
 ```yaml
 on:
