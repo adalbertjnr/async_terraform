@@ -3,18 +3,15 @@ description: run terraform concurrently
 inputs:
   tasks:
     description: "terraform project folders"
-    required: true
+    default: "."
   verb:
     description: "plan, apply or destroy"
     required: true
-    default: plan
   workers:
     description: "insert the number of workers to run concurrently"
-    required: true
-    default: 2
+    default: 1
   version:
     description: "terraform version"
-    required: true
     default: "1.7.0"
 
 runs:
