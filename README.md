@@ -2,7 +2,7 @@
 
 ### Introduction
 
-At some point I had to run a lot o terraform one-by-one in a mono repo to manage simple resources in AWS. To address this, I did create this action.
+At some point I had to run a lot of terraform one-by-one in a mono repo to manage simple resources in AWS. To address this, I did create this action.
 
 ### Overview
 
@@ -14,37 +14,31 @@ Then the action will run all projects concurrently based on the number os worker
 
 ```
 The Action must have four parameters
-1. workers -> Specifies the number of workers running concurrently in a worker pool to execute the terraform tasks. The default value is 2.
+1. workers -> Specifies the number of workers running concurrently in a worker pool to execute the terraform tasks. The default value is 1.
 2. verb -> Specifies the action to be performed by Terraform. Plan, apply or destroy. This is set manually by input using workflow_dispatch as the example below
-3. tasks -> The list of tasks (terraform projects) to be read by the action
-4. version -> Specifies the terraform version
+3. tasks -> The list of tasks (terraform projects) to be read by the action. The default is "."
+4. version -> Specifies the terraform version. The default is "1.7.0"
 ```
 
 **Below is the folder structure example to use the action**
 Remember to replace each string in "tasks" with each name of your project. In the example below I'm using terraform_1, terraform_2, terraform_3, terraform_4
 
+### The action need to be like this
+
+**The credentials step below can be modified to autenticate in another cloud provider**
+
+Example using the root path if the user need to run only one project
+If the user need to run only a single project, there's no need to set workers (default is 1), tasks (default is root directory).
+
 ```
 ├── .github
 │   └── workflows
 │       └── action.yml
-├── terraform_1
-│   ├── providers.tf
-│   └── vpc.tf
-├── terraform_2
-│   ├── providers.tf
-│   └── vpc.tf
-├── terraform_3
-│   ├── providers.tf
-│   └── vpc.tf
-├── terraform_4
-│   ├── providers.tf
-│   └── vpc.tf
-
+├── main.tf
+└── provider.tf
 ```
 
-### The action need to be like this
-
-**The credentials step below can be modified to autenticate in another cloud provider**
+Below is the action example
 
 ```yaml
 on:
@@ -66,7 +60,61 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
+      - name: Terraform Task
+        uses: adalbertjnr/async_terraform@v1
+        with:
+          verb: ${{ inputs.verb }}
+          version: "1.8.2"
+```
+
+Example for few terraform projects.
+
+```
+├── .github
+│   └── workflows
+│       └── action.yml
+├── terraform_1
+│   ├── providers.tf
+│   └── vpc.tf
+├── terraform_2
+│   ├── providers.tf
+│   └── vpc.tf
+├── terraform_3
+│   ├── providers.tf
+│   └── vpc.tf
+├── terraform_4
+│   ├── providers.tf
+│   └── vpc.tf
+
+```
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      verb:
+        description: "Plan, apply or destroy"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - -----
+          - destroy
+
+name: Async_terraform
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
