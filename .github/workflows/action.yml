@@ -1,8 +1,5 @@
 on:
-  push:
-    branches-ignore:
-      - main
-
+  workflow_dispatch:
 jobs:
   create_image:
     runs-on: ubuntu-latest
