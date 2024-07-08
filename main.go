@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 )
 
 func main() {
 	params := NewInputParser()
 	if errors := params.Validate(); len(errors) > 0 {
-		JSON(errors)
+		logErrors(errors)
 		return
 	}
 
@@ -16,6 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	task := NewTaskManager(params, svc).retrieveTasks()
+	ctx := context.Background()
+	task := NewTaskManager(ctx, params, svc).retrieveTasks()
 	task.start()
 }

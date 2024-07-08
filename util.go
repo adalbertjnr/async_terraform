@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
-	"log"
-	"os"
+	"log/slog"
 	"strings"
 )
 
@@ -33,10 +31,9 @@ func (t *InputParser) Validate() map[string]string {
 	return errors
 }
 
-func JSON(data interface{}) {
-	if err := json.NewEncoder(os.Stdout).Encode(data); err != nil {
-		log.Println("error enconding the error message")
-		return
+func logErrors(errors map[string]string) {
+	for err, msg := range errors {
+		slog.Error("validate errors", err, msg)
 	}
 }
 

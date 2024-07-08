@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"strings"
 )
 
@@ -13,28 +14,18 @@ const (
 )
 
 type TaskManager struct {
+	ctx        context.Context
 	tfsvc      TFService
-	dataParams workManagerParams
+	dataParams InputParser
 	tasks      []string
 	taskch     chan string
 	done       chan struct{}
 }
 
-type workManagerParams struct {
-	user    string
-	verb    string
-	tasks   string
-	version string
-	workers int
-}
-
-func managerData(input InputParser) workManagerParams {
-	return workManagerParams(input)
-}
-
-func NewTaskManager(input InputParser, svc *TFService) *TaskManager {
+func NewTaskManager(ctx context.Context, input InputParser, svc *TFService) *TaskManager {
 	return &TaskManager{
-		dataParams: managerData(input),
+		ctx:        ctx,
+		dataParams: input,
 		tfsvc:      *svc,
 	}
 }
@@ -52,7 +43,7 @@ func (w *TaskManager) retrieveTasks() *TaskManager {
 }
 
 func (w *TaskManager) start() {
-	log.Printf("started by [%s] with verb [%s]\n", w.dataParams.user, strings.ToUpper(w.dataParams.verb))
+	slog.Info("message", "started by user", w.dataParams.user, "verb", strings.ToUpper(w.dataParams.verb))
 
 	w.startChannels()
 	workers := w.dataParams.workers
@@ -60,12 +51,16 @@ func (w *TaskManager) start() {
 		go w.worker(i, w.dataParams.verb)
 	}
 
-	for _, task := range w.tasks {
-		w.taskch <- task
-	}
+	w.bootstrap()
 
 	close(w.taskch)
 	w.release(workers)
+}
+
+func (w *TaskManager) bootstrap() {
+	for _, task := range w.tasks {
+		w.taskch <- task
+	}
 }
 
 func (w *TaskManager) release(workers int) {
@@ -75,31 +70,33 @@ func (w *TaskManager) release(workers int) {
 }
 
 func (t *TaskManager) worker(workerId int, verb string) {
-	ctx := context.Background()
+	defer func() {
+		t.done <- struct{}{}
+	}()
+
 	for task := range t.taskch {
-		log.Printf("running terraform on [%s] by worker [%d] with verb [%s]\n", task, workerId, strings.ToUpper(verb))
+		slog.Info("running terraform", "aws account", task, "worker", workerId, "verb", strings.ToUpper(verb))
 
 		switch verb {
 		case Apply:
-			err := t.tfsvc.terraformTaskCreate(ctx, task, t.tfsvc.execPath)
+			err := t.tfsvc.terraformTaskCreate(t.ctx, task, t.tfsvc.execPath)
 			if err != nil {
 				log.Println(err)
 			}
 		case Destroy:
-			err := t.tfsvc.terraformTaskDestroy(ctx, task, t.tfsvc.execPath)
+			err := t.tfsvc.terraformTaskDestroy(t.ctx, task, t.tfsvc.execPath)
 			if err != nil {
 				log.Println(err)
 			}
 		case Plan:
-			err := t.tfsvc.terraformTaskPlan(ctx, task, t.tfsvc.execPath)
+			err := t.tfsvc.terraformTaskPlan(t.ctx, task, t.tfsvc.execPath)
 			if err != nil {
 				log.Println(err)
 			}
 		default:
-			log.Println("verb not found")
+			slog.Warn("task manager warn", "verb", strings.ToUpper(verb), "status", "not found")
 		}
 	}
-	t.done <- struct{}{}
 }
 
 func (w *TaskManager) startChannels() {
