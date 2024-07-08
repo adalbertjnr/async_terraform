@@ -46,18 +46,17 @@ func (w *TaskManager) start() {
 	slog.Info("message", "started by user", w.dataParams.user, "verb", strings.ToUpper(w.dataParams.verb))
 
 	w.startChannels()
-	workers := w.dataParams.workers
+	w.bootstrap(w.dataParams.workers)
+
+	close(w.taskch)
+	w.release(w.dataParams.workers)
+}
+
+func (w *TaskManager) bootstrap(workers int) {
 	for i := 0; i < workers; i++ {
 		go w.worker(i, w.dataParams.verb)
 	}
 
-	w.bootstrap()
-
-	close(w.taskch)
-	w.release(workers)
-}
-
-func (w *TaskManager) bootstrap() {
 	for _, task := range w.tasks {
 		w.taskch <- task
 	}
